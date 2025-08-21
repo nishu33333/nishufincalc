@@ -1218,6 +1218,10 @@
                                 <label for="stepUp_sip">Annual Step-up (%) (Optional)</label>
                                 <input type="number" id="stepUp_sip" placeholder="e.g. 0">
                             </div>
+                            <div class="input-group">
+                                <label for="inflation_sip">Inflation Rate (%) (Optional)</label>
+                                <input type="number" id="inflation_sip" placeholder="e.g. 6">
+                            </div>
                             <button onclick="calculateSIP()">Calculate SIP Returns</button>
                         </div>
                         <div class="calculator-input-results">
@@ -2142,7 +2146,9 @@
             const years = parseInt(document.getElementById('years_sip').value, 10);
             const stepUpInput = document.getElementById('stepUp_sip').value;
             const stepUp = stepUpInput ? parseFloat(stepUpInput) : 0;
-            console.log('SIP Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp);
+            const inflationInput = document.getElementById('inflation_sip').value;
+            const inflationRate = inflationInput ? parseFloat(inflationInput) : 0;
+            console.log('SIP Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp, 'inflationRate:', inflationRate);
 
             const resultDiv = document.getElementById('results_sip');
 
@@ -2187,6 +2193,14 @@
             const returnsR = Math.round(returns);
             const fvR = Math.round(FV);
 
+            // Calculate inflation-adjusted amount (present value of future amount)
+            let inflationAdjustedFV = 0;
+            if (inflationRate > 0) {
+                // Calculate the present value of the future amount considering inflation
+                inflationAdjustedFV = FV / Math.pow(1 + inflationRate / 100, years);
+            }
+            const inflationAdjustedFVR = Math.round(inflationAdjustedFV);
+
             // Calculate final monthly investment
             const finalMonthlyInvestment = P * Math.pow(1 + stepUp / 100, years);
 
@@ -2216,7 +2230,12 @@
                 <div class="result-row">
                     <div class="result-label">Total Value</div>
                     <div class="result-value highlight">₹${formatIndianNumber(fvR)}</div>
-                </div>`;
+                </div>
+                ${inflationRate > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Inflation-Adjusted Total Value (${inflationRate}% inflation)</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(inflationAdjustedFVR)}</div>
+                </div>` : ''}`;
 
             // Update helper text
             const monthlyHelper = document.getElementById('monthly_sip_helper');
