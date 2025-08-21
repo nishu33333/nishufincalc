@@ -1218,6 +1218,10 @@
                                 <label for="stepUp_sip">Annual Step-up (%) (Optional)</label>
                                 <input type="number" id="stepUp_sip" placeholder="e.g. 0">
                             </div>
+                            <div class="input-group">
+                                <label for="inflation_sip">Inflation Rate (%) (Optional)</label>
+                                <input type="number" id="inflation_sip" placeholder="e.g. 6">
+                            </div>
                             <button onclick="calculateSIP()">Calculate SIP Returns</button>
                         </div>
                         <div class="calculator-input-results">
@@ -2142,7 +2146,9 @@
             const years = parseInt(document.getElementById('years_sip').value, 10);
             const stepUpInput = document.getElementById('stepUp_sip').value;
             const stepUp = stepUpInput ? parseFloat(stepUpInput) : 0;
-            console.log('SIP Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp);
+            const inflationInput = document.getElementById('inflation_sip') ? document.getElementById('inflation_sip').value : '';
+            const inflation = inflationInput ? parseFloat(inflationInput) : 0;
+            console.log('SIP Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp, 'inflation:', inflation);
 
             const resultDiv = document.getElementById('results_sip');
 
@@ -2187,6 +2193,32 @@
             const returnsR = Math.round(returns);
             const fvR = Math.round(FV);
 
+            // Compute inflation-adjusted total using real return rate if inflation is provided
+            let fvRealR = null;
+            if (inflation > 0) {
+                const realAnnualRate = ((1 + annualRate / 100) / (1 + inflation / 100)) - 1;
+                const realMonthlyRate = Math.pow(1 + realAnnualRate, 1 / 12) - 1;
+
+                let FV_real = 0;
+                if (stepUp === 0) {
+                    if (realMonthlyRate === 0) {
+                        FV_real = P * months;
+                    } else {
+                        FV_real = P * ((Math.pow(1 + realMonthlyRate, months) - 1) / realMonthlyRate) * (1 + realMonthlyRate);
+                    }
+                } else {
+                    let currentMonthlyReal = P;
+                    FV_real = 0;
+                    for (let y = 1; y <= years; y++) {
+                        for (let m = 1; m <= 12; m++) {
+                            FV_real = (FV_real + currentMonthlyReal) * (1 + realMonthlyRate);
+                        }
+                        currentMonthlyReal = currentMonthlyReal * (1 + stepUp / 100);
+                    }
+                }
+                fvRealR = Math.round(FV_real);
+            }
+
             // Calculate final monthly investment
             const finalMonthlyInvestment = P * Math.pow(1 + stepUp / 100, years);
 
@@ -2216,7 +2248,12 @@
                 <div class="result-row">
                     <div class="result-label">Total Value</div>
                     <div class="result-value highlight">₹${formatIndianNumber(fvR)}</div>
-                </div>`;
+                </div>
+                ${inflation > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Inflation Adjusted Total (today's value)</div>
+                    <div class="result-value">₹${formatIndianNumber(fvRealR)}</div>
+                </div>` : ''}`;
 
             // Update helper text
             const monthlyHelper = document.getElementById('monthly_sip_helper');
@@ -2313,6 +2350,7 @@
                 'monthlyExpense_ret',
                 'monthlyInvestment_ret',
                 'monthly_sip',
+                'inflation_sip',
                 'loan_amount'
             ];
 
