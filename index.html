@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nishanth's Financial Calculator</title>
+    <link rel="icon" type="image/jpeg" href="Nishanth.jpg">
+    <style>
+        :root {
+            /* Dark theme variables */
+            --bg1-dark: #2c5364;
+            --bg2-dark: #203a43;
+            --bg3-dark: #0f2027;
+            --card-dark: rgba(255, 255, 255, 0.05);
+            --text-dark: #ffffff;
+            --text-secondary-dark: #cfe6e6;
+            --input-bg-dark: rgba(255, 255, 255, 0.1);
+            --button-bg-dark: rgba(255, 255, 255, 0.15);
+
+            /* Light theme variables */
+            --bg1-light: #e6f0ff;
+            --bg2-light: #fff0e6;
+            --bg3-light: #f0ffe6;
+            --card-light: rgba(230, 240, 255, 0.9);
+            --text-light: #1e293b;
+            --text-secondary-light: #2c5282;
+            --input-bg-light: #f0e6ff;
+            --button-bg-light: #e6f7ff;
+            --border-light: #4299e1;
+            --gradient1-light: #ff6b6b;
+            --gradient2-light: #4ecdc4;
+            --gradient3-light: #ffbe0b;
+
+            /* Shared variables */
+            --accent1: #00b09b;
+            --accent2: #96c93d;
+            --highlight: #ffb74d;
+            --good: #4CAF50;
+
+            /* Default to dark theme */
+            --bg1: var(--bg1-dark);
+            --bg2: var(--bg2-dark);
+            --bg3: var(--bg3-dark);
+            --card: var(--card-dark);
+            --text: var(--text-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --input-bg: var(--input-bg-dark);
+            --button-bg: var(--button-bg-dark);
+        }
+
+        [data-theme="light"] {
+            --bg1: var(--bg1-light);
+            --bg2: var(--bg2-light);
+            --bg3: var(--bg3-light);
+            --card: var(--card-light);
+            --text: var(--text-light);
+            --text-secondary: var(--text-secondary-light);
+            --input-bg: var(--input-bg-light);
+            --button-bg: var(--button-bg-light);
+        }
+
+        [data-theme="light"] .container {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .calculator-buttons {
+            background: #86b5e4;
+            border: none;
+            box-shadow: none;
+        }
+
+        [data-theme="light"] input[type="number"] {
+            border: 1px solid #e2e8f0;
+            background: #dfdfdf;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        [data-theme="light"] input[type="number"]:focus {
+            border-color: var(--accent1);
+            box-shadow: 0 0 0 2px rgba(0, 176, 155, 0.1);
+            outline: none;
+        }
+
+        [data-theme="light"] button {
+            border: 1px solid var(--border-light);
+            background: var(--button-bg-light);
+            color: var(--text-light);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="light"] label {
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        [data-theme="light"] .input-group {
+            margin-bottom: 20px;
+        }
+
+        [data-theme="light"] .helper {
+            color: #64748b;
+        }
+
+        [data-theme="light"] .results {
+            background: var(--bg3-light);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .tab-button {
+            background: var(--button-bg-light);
+            border: 1px solid var(--border-light);
+            color: var(--text-light);
+        }
+
+        [data-theme="light"] .tab-button:hover,
+        [data-theme="light"] .tab-button.active {
+            background: var(--accent1);
+            color: white;
+            border-color: var(--accent1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Theme switch styles */
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+        }
+
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--button-bg);
+            transition: 0.4s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent1);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .sun,
+        .moon {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        body {
+            font-family: Inter, system-ui, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg3), var(--bg2), var(--bg1));
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(6px);
+            min-height: 800px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        @media screen and (min-width: 1024px) {
+            .tabs {
+                position: sticky;
+                top: 0;
+            }
+        }
+
+        .tab-content {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            width: 100%;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            min-height: 600px;
+            pointer-events: none;
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            visibility: visible;
+            position: relative;
+            pointer-events: all;
+        }
+
+        .calculator-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .calculator-buttons {
+            background: var(--calculator-bg-light);
+            padding: 24px;
+            border-radius: 12px;
+            width: 100%;
+            border: 1px solid var(--border-light);
+        }
+
+        .calculator-input-results {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group:last-of-type {
+            margin-bottom: 24px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .result-value.good {
+            color: #2e7d32;
+        }
+
+        .result-value.highlight {
+            color: #f57c00;
+        }
+
+        .result-value.bad {
+            color: #d32f2f;
+        }
+
+        [data-theme="light"] .result-value.good {
+            color: #2e7d32;
+        }
+
+        [data-theme="light"] .result-value.highlight {
+            color: #f57c00;
+        }
+
+        [data-theme="light"] .result-value.bad {
+            color: #d32f2f;
+        }
+
+        @media screen and (min-width: 1024px) {
+            .calculator-layout {
+                flex-direction: row;
+                gap: 24px;
+            }
+
+            .calculator-buttons {
+                flex: 0 0 60%;
+                min-width: 600px;
+            }
+
+            .calculator-input-results {
+                flex: 1;
+                margin-top: 0;
+            }
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .calculator-nav {
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .calculator-content {
+            width: 100%;
+        }
+
+        @media screen and (min-width: 1024px) {
+            .main-layout {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+
+            .calculator-nav {
+                width: 250px;
+                flex-shrink: 0;
+                position: sticky;
+                top: 24px;
+                margin-bottom: 0;
+                margin-right: 24px;
+            }
+
+            .calculator-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .tabs {
+                flex-direction: column;
+                margin-bottom: 0;
+            }
+
+            .tab-button {
+                text-align: left;
+                width: 100%;
+                background: var(--button-bg);
+                color: var(--text);
+                border: 1px solid var(--border-light);
+                padding: 12px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease-in-out;
+                font-weight: 500;
+            }
+
+            .tab-button:hover {
+                background: var(--accent1);
+                color: white;
+                border-color: var(--accent1);
+            }
+
+            .tab-button.active {
+                background: var(--accent1);
+                color: white;
+                border-color: var(--accent1);
+            }
+
+            .calculator-layout {
+                grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+                align-items: start;
+            }
+
+            .calculator-buttons,
+            .calculator-input-results {
+                position: sticky;
+                top: 24px;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .sub {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* Reset default input appearance */
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        label {
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: var(--text);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: var(--accent1);
+            color: white;
+            border-color: var(--accent1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(90deg, var(--accent1), var(--accent2));
+            color: #042018;
+            font-weight: 600;
+        }
+
+        @media screen and (min-width: 1024px) {
+            .tabs {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .tabs {
+                flex-direction: row;
+            }
+
+            .tab-button {
+                width: auto;
+            }
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .calculator-layout {
+            display: grid;
+            gap: 24px;
+        }
+
+        @media screen and (min-width: 1024px) {
+            .calculator-layout {
+                grid-template-columns: 1fr 1.5fr;
+            }
+        }
+
+        @media screen and (max-width: 1023px) {
+            .calculator-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .calculator-buttons {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 12px;
+            border: none;
+            box-shadow: none;
+        }
+
+        .calculator-input-results {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #d7e6e6;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 0;
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            min-width: 0;
+            box-shadow: none;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border: 0;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: none;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        input[type="number"]::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .helper {
+            margin-top: 6px;
+            color: #9fb2b3;
+            font-size: 13px;
+            min-height: 18px;
+        }
+
+        button {
+            background: linear-gradient(90deg, var(--accent1), var(--accent2));
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            color: #042018;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            width: 100%;
+            margin-top: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        #fire .calculator-buttons button {
+            margin-top: 0;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .results {
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .results.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            color: #9fb2b3;
+            font-size: 14px;
+        }
+
+        .result-value {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .result-value.highlight {
+            color: var(--highlight);
+        }
+
+        .result-value.good {
+            color: var(--good);
+        }
+
+        .result-value.bad {
+            color: #ff6b6b;
+        }
+
+        /* NEW Celebration Animation for Good Results */
+        @keyframes celebrate {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            20% {
+                transform: scale(1.4) rotate(15deg);
+            }
+
+            40% {
+                transform: scale(1.6) rotate(-20deg);
+            }
+
+            60% {
+                transform: scale(1.4) rotate(15deg);
+            }
+
+            80% {
+                transform: scale(1.2) rotate(-10deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes sad {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            25% {
+                transform: scale(0.85) rotate(-8deg);
+            }
+
+            50% {
+                transform: scale(0.7) rotate(8deg);
+            }
+
+            75% {
+                transform: scale(0.85) rotate(-8deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .celebrate {
+            animation: celebrate 2s ease-in-out;
+            box-shadow: 0 0 40px #8be08b, 0 0 80px #4CAF50;
+        }
+
+        .sad {
+            animation: sad 2s ease-in-out;
+            box-shadow: 0 0 40px #ff6b6b, 0 0 80px #f44336;
+        }
+
+        .result-smiley {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 18px;
+            animation: smileyPop 0.6s ease-out;
+        }
+
+        @keyframes smileyPop {
+            0% {
+                transform: scale(0) rotate(-10deg);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.2) rotate(5deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .calculator-layout {
+                flex-direction: column;
+            }
+
+            .calculator-buttons {
+                width: 100%;
+                position: static;
+            }
+
+            .calculator-input-results {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 24px;
+                position: static;
+            }
+        }
+
+        .results {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: fit-content;
+            height: auto;
+            word-wrap: break-word;
+        }
+
+        @keyframes rotateNegative {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            15% {
+                transform: rotate(15deg);
+            }
+
+            30% {
+                transform: rotate(0deg);
+            }
+
+            45% {
+                transform: rotate(-15deg);
+            }
+
+            60% {
+                transform: rotate(0deg);
+            }
+
+            75% {
+                transform: rotate(10deg);
+            }
+
+            90% {
+                transform: rotate(-10deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes scalePositive {
+            0% {
+                transform: scale(1);
+            }
+
+            20% {
+                transform: scale(1.08);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+
+            60% {
+                transform: scale(1.08);
+            }
+
+            80% {
+                transform: scale(1);
+            }
+
+            90% {
+                transform: scale(1.04);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .fire-positive {
+            animation: scalePositive 1s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            transform-origin: center;
+            will-change: transform;
+        }
+
+        .fire-negative {
+            animation: rotateNegative 1s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            transform-origin: center;
+            will-change: transform;
+        }
+
+        .remove-margin {
+            margin-top: 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="theme-switch-wrapper">
+                    <label class="theme-switch" for="checkbox">
+                        <input type="checkbox" id="checkbox" />
+                        <div class="slider round">
+                            <span class="moon">🌙</span>
+                            <span class="sun">☀️</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <h1>Nishanth's Financial Calculator</h1>
+            <div class="sub">FIRE, Trading Returns, SWP & Retirement Planning</div>
+        </header>
+
+        <div class="main-layout">
+            <nav class="calculator-nav">
+                <div class="tabs">
+                    <button class="tab-button active my-div remove-margin" onclick="showTab('fire')">FIRE Percentage
+                        Calculator</button>
+                    <button class="tab-button" onclick="showTab('tradingEdge')">Trading Edge Calculator</button>
+                    <button class="tab-button" onclick="showTab('tradingReturn')">Trading or Lumpsum Calculator</button>
+                    <button class="tab-button" onclick="showTab('returnRate')">Return Rate Calculator</button>
+                    <button class="tab-button" onclick="showTab('investmentLength')">Investment Length
+                        Calculator</button>
+                    <button class="tab-button" onclick="showTab('swp')">SWP Calculator</button>
+                    <button class="tab-button" onclick="showTab('retirement')">Retirement Calculator</button>
+                    <button class="tab-button" onclick="showTab('sip')">SIP Calculator</button>
+                    <button class="tab-button" onclick="showTab('emi')">EMI Calculator</button>
+                </div>
+            </nav>
+
+            <div class="calculator-content">
+
+                <!-- FIRE Calculator -->
+                <div id="fire" class="tab-content active">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="salary_fire">Annual Salary (₹)</label>
+                                <input type="number" id="salary_fire" placeholder="e.g. 1200000">
+                                <div id="salary_fire_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="multiple_fire">Target Multiple of Salary</label>
+                                <input type="number" id="multiple_fire" placeholder="e.g. 25">
+                            </div>
+                            <div class="input-group">
+                                <label for="cagr_fire">Annual CAGR (%)</label>
+                                <input type="number" id="cagr_fire" placeholder="e.g. 12">
+                            </div>
+                            <div class="input-group">
+                                <label for="years_fire">Years to Invest</label>
+                                <input type="number" id="years_fire" placeholder="e.g. 15">
+                            </div>
+
+
+                            <div class="input-group">
+                                <label for="inflation_fire">Inflation Rate (%)</label>
+                                <input type="number" id="inflation_fire" placeholder="e.g. 6">
+                            </div>
+                            <div class="input-group">
+                                <label for="stepUp_fire">Annual Step-up (%) (Optional)</label>
+                                <input type="number" id="stepUp_fire" placeholder="e.g. 5">
+                            </div>
+                            <button class="fire-calc-btn" onclick="calcFire()">Calculate FIRE Numbers</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_fire" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Edge Calculator -->
+                <div id="tradingEdge" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="startAmount">Starting Amount (₹)</label>
+                                <input type="number" id="startAmount" placeholder="e.g. 100000">
+                                <div id="startAmount_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="riskPercent">Average Risk per Trade (%)</label>
+                                <input type="number" id="riskPercent" placeholder="e.g. 1">
+                            </div>
+                            <div class="input-group">
+                                <label for="winPercent">Average Win per Trade (%)</label>
+                                <input type="number" id="winPercent" placeholder="e.g. 2">
+                            </div>
+                            <div class="input-group">
+                                <label for="winRate">Win Rate (%)</label>
+                                <input type="number" id="winRate" placeholder="e.g. 33">
+                            </div>
+                            <div class="input-group">
+                                <label for="numTrades">Number of Trades</label>
+                                <input type="number" id="numTrades" placeholder="e.g. 100">
+                            </div>
+                            <div class="input-group">
+                                <label for="positionSize">Position Size (% of Total Investment) <span
+                                        style="color: #9fb2b3; font-size: 12px;">(Optional)</span></label>
+                                <input type="number" id="positionSize" placeholder="e.g. 5 (or leave empty for 100%)"
+                                    step="0.1" min="0.1" max="100">
+                                <div class="helper">Enter the percentage of your total investment you want to risk per
+                                    trade.
+                                    Common values: 1-5% for conservative, 5-10% for moderate, 10-20% for aggressive.
+                                    Leave empty
+                                    to use 100% of capital.</div>
+                            </div>
+                            <button onclick="calcTradingEdge()">Calculate Trading Edge</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_tradingEdge" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Return Calculator -->
+                <div id="tradingReturn" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="startingAmount_trade">Starting Amount (₹)</label>
+                                <input type="number" id="startingAmount_trade" placeholder="e.g. 100000">
+                                <div id="startingAmount_trade_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="years_trade">Number of Years</label>
+                                <input type="number" id="years_trade" placeholder="e.g. 5">
+                            </div>
+                            <div class="input-group">
+                                <label for="cagr_trade">Annual Return (CAGR %)</label>
+                                <input type="number" id="cagr_trade" placeholder="e.g. 12">
+                            </div>
+                            <div class="input-group">
+                                <label for="monthlyContribution_trade">Monthly Contribution (₹) (Optional)</label>
+                                <input type="number" id="monthlyContribution_trade" placeholder="e.g. 10000">
+                                <div id="monthlyContribution_trade_helper" class="helper"></div>
+
+                            </div>
+                            <div class="input-group">
+                                <label for="stepUp_trade">Step-up % per year (Optional)</label>
+                                <input type="number" id="stepUp_trade" placeholder="e.g. 5">
+                            </div>
+                            <div class="input-group">
+                                <label for="inflation_trade">Inflation Rate (%) (Optional)</label>
+                                <input type="number" id="inflation_trade" placeholder="e.g. 6">
+                            </div>
+                            <button onclick="calcTradingReturn()">Calculate Trading Returns</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_tradingReturn" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Return Rate Calculator -->
+                <div id="returnRate" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="targetAmount">Your Target Amount (₹)</label>
+                                <input type="number" id="targetAmount" placeholder="e.g. 1000000">
+                                <div id="targetAmount_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="startingAmount_return">Starting Amount (₹)</label>
+                                <input type="number" id="startingAmount_return" placeholder="e.g. 20000">
+                                <div id="startingAmount_return_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="years_return">Number of Years</label>
+                                <input type="number" id="years_return" placeholder="e.g. 10">
+                            </div>
+                            <div class="input-group">
+                                <label for="monthlyContribution_return">Monthly Contribution (₹) (Optional)</label>
+                                <input type="number" id="monthlyContribution_return" placeholder="e.g. 1000">
+                                <div id="monthlyContribution_return_helper" class="helper"></div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="stepUp_return">Annual Step-up (%) (Optional)</label>
+                                <input type="number" id="stepUp_return" placeholder="e.g. 5">
+                            </div>
+                            <div class="input-group">
+                                <label for="inflation_return">Inflation Rate (%) (Optional)</label>
+                                <input type="number" id="inflation_return" placeholder="e.g. 6" step="0.1">
+                                <div class="helper">Enter the annual inflation rate to calculate inflation-adjusted
+                                    target
+                                </div>
+                            </div>
+                            <button onclick="calcReturnRate()">Calculate Required Return Rate</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_returnRate" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investment Length Calculator -->
+                <div id="investmentLength" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="targetAmount_length">Your Target Amount (₹)</label>
+                                <input type="number" id="targetAmount_length" placeholder="e.g. 1000000">
+                                <div id="targetAmount_length_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="startingAmount_length">Starting Amount (₹)</label>
+                                <input type="number" id="startingAmount_length" placeholder="e.g. 20000">
+                                <div id="startingAmount_length_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="returnRate_length">Return Rate (%)</label>
+                                <input type="number" id="returnRate_length" placeholder="e.g. 6" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label for="monthlyContribution_length">Monthly Contribution (₹) (Optional)</label>
+                                <input type="number" id="monthlyContribution_length" placeholder="e.g. 1000">
+                                <div id="monthlyContribution_length_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="stepUp_length">Annual Step-up (%) (Optional)</label>
+                                <input type="number" id="stepUp_length" placeholder="e.g. 5" step="0.1">
+                                <div class="helper">Enter the percentage increase in monthly contribution per year</div>
+                            </div>
+                            <div class="input-group">
+                                <label for="inflation_length">Inflation Rate (%) (Optional)</label>
+                                <input type="number" id="inflation_length" placeholder="e.g. 6" step="0.1">
+                                <div class="helper">Enter the annual inflation rate to calculate inflation-adjusted
+                                    target</div>
+                            </div>
+                            <button onclick="calcInvestmentLength()">Calculate Investment Length</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_investmentLength" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SWP Calculator -->
+                <div id="swp" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="totalInvestment">Total Investment (₹)</label>
+                                <input type="number" id="totalInvestment" placeholder="e.g. 1000000">
+                                <div id="totalInvestmentHelper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="yearlyWithdrawal">Yearly Withdrawal Amount (₹)</label>
+                                <input type="number" id="yearlyWithdrawal" placeholder="e.g. 100000">
+                                <div id="yearlyWithdrawalHelper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="stepUp">Yearly Withdrawal Step-Up (%) (Optional)</label>
+                                <input type="number" id="stepUp" placeholder="e.g. 5">
+                            </div>
+                            <div class="input-group">
+                                <label for="cagr_swp">Annual CAGR (%)</label>
+                                <input type="number" id="cagr_swp" placeholder="e.g. 12">
+                            </div>
+                            <div class="input-group">
+                                <label for="inflation_swp">Inflation Rate (%)</label>
+                                <input type="number" id="inflation_swp" placeholder="e.g. 6">
+                            </div>
+                            <div class="input-group">
+                                <label for="years_swp">Time Period (years)</label>
+                                <input type="number" id="years_swp" placeholder="e.g. 20">
+                            </div>
+                            <button onclick="calcSWP()">Calculate SWP</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_swp" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Retirement Calculator -->
+                <div id="retirement" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="monthlyExpense_ret">Current Monthly Expense (₹)</label>
+                                <input type="number" id="monthlyExpense_ret" placeholder="e.g. 50000">
+                                <div id="monthlyExpense_ret_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="currentAge_ret">Current Age</label>
+                                <input type="number" id="currentAge_ret" placeholder="e.g. 30">
+                            </div>
+                            <div class="input-group">
+                                <label for="retirementAge_ret">Retirement Age</label>
+                                <input type="number" id="retirementAge_ret" placeholder="e.g. 60">
+                            </div>
+                            <div class="input-group">
+                                <label for="yearsOfSalary_ret">Years of Annual Salary Needed</label>
+                                <input type="number" id="yearsOfSalary_ret" placeholder="e.g. 25">
+                            </div>
+                            <div class="input-group">
+                                <label for="inflationRate_ret">Inflation Rate (%)</label>
+                                <input type="number" id="inflationRate_ret" placeholder="e.g. 6">
+                            </div>
+                            <div class="input-group">
+                                <label for="monthlyInvestment_ret">Monthly SIP Amount (₹)</label>
+                                <input type="number" id="monthlyInvestment_ret" placeholder="e.g. 25000">
+                                <div id="monthlyInvestment_ret_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="cagr_ret">Expected CAGR (%)</label>
+                                <input type="number" id="cagr_ret" placeholder="e.g. 12">
+                            </div>
+                            <div class="input-group">
+                                <label for="stepUp_ret">Annual SIP Step-up (%) (Optional)</label>
+                                <input type="number" id="stepUp_ret" placeholder="e.g. 5">
+                            </div>
+                            <button onclick="calcRetirement()">Calculate Retirement Plan</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_retirement" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIP Calculator -->
+                <div id="sip" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="monthly_sip">Monthly SIP Amount (₹)</label>
+                                <input type="number" id="monthly_sip" placeholder="e.g. 15000">
+                                <div id="monthly_sip_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="annualRate_sip">Expected Annual Return (%)</label>
+                                <input type="number" id="annualRate_sip" placeholder="e.g. 15">
+                            </div>
+                            <div class="input-group">
+                                <label for="years_sip">Investment Duration (yrs)</label>
+                                <input type="number" id="years_sip" placeholder="e.g. 15">
+                            </div>
+                            <div class="input-group">
+                                <label for="stepUp_sip">Annual Step-up (%) (Optional)</label>
+                                <input type="number" id="stepUp_sip" placeholder="e.g. 0">
+                            </div>
+                            <button onclick="calculateSIP()">Calculate SIP Returns</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_sip" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMI Calculator -->
+                <div id="emi" class="tab-content">
+                    <div class="calculator-layout">
+                        <div class="calculator-buttons">
+                            <div class="input-group">
+                                <label for="loan_amount">Loan Amount (₹)</label>
+                                <input type="number" id="loan_amount" placeholder="e.g. 2000000">
+                                <div id="loan_amount_helper" class="helper"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="interest_rate">Interest Rate (% per annum)</label>
+                                <input type="number" id="interest_rate" placeholder="e.g. 8.5" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label for="loan_tenure">Loan Tenure (years)</label>
+                                <input type="number" id="loan_tenure" placeholder="e.g. 20">
+                            </div>
+                            <div class="input-group">
+                                <label for="processing_fee">Processing Fee (%) <span
+                                        class="small">(optional)</span></label>
+                                <input type="number" id="processing_fee" placeholder="e.g. 0.5" step="0.01">
+                            </div>
+                            <button onclick="calculateEMI()">Calculate EMI Details</button>
+                        </div>
+                        <div class="calculator-input-results">
+                            <div id="results_emi" class="results"></div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- End calculator-content -->
+        </div> <!-- End main-layout -->
+    </div> <!-- End container -->
+
+    <script>
+        // Tab Switching
+        function switchTab(tabId) {
+            const allTabs = document.querySelectorAll('.tab-content');
+            const currentTab = document.querySelector('.tab-content.active');
+            const nextTab = document.getElementById(tabId);
+
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Add active class to selected tab button
+            document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+            if (currentTab === nextTab) return; // Don't switch if it's the same tab
+
+            // Remove active class from current tab
+            if (currentTab) {
+                currentTab.classList.remove('active');
+            }
+
+            // Add active class to new tab
+            nextTab.classList.add('active');
+        }        // Utility Functions
+        function formatIndianNumber(num) {
+            if (!isFinite(num)) return "0";
+            const absNum = Math.abs(Math.round(num));
+            if (absNum >= 10000000) {
+                return absNum.toLocaleString('en-IN') + " (" + (absNum / 10000000).toFixed(1) + " crores)";
+            } else if (absNum >= 100000) {
+                return absNum.toLocaleString('en-IN') + " (" + (absNum / 100000).toFixed(1) + " lakhs)";
+            }
+            return absNum.toLocaleString('en-IN');
+        }
+
+        function readableSimple(num) {
+            if (!isFinite(num) || num === 0) return "";
+            const abs = Math.abs(num);
+            if (abs >= 10000000) return (num / 10000000).toFixed(2) + " crores";
+            if (abs >= 100000) return (num / 100000).toFixed(2) + " lakhs";
+            return num.toLocaleString('en-IN');
+        }
+
+        // Tab Management
+        function showTab(tabId) {
+            // Hide all tabs and remove active class from buttons
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab and activate button
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // FIRE Calculator
+        function calcFire() {
+            const cagr = parseFloat(document.getElementById('cagr_fire').value) / 100;
+            const years = parseInt(document.getElementById('years_fire').value);
+            const salary = parseFloat(document.getElementById('salary_fire').value);
+            const multiple = parseFloat(document.getElementById('multiple_fire').value);
+            const inflation = parseFloat(document.getElementById('inflation_fire').value) / 100;
+            const stepUpInput = document.getElementById('stepUp_fire').value;
+            const stepUp = stepUpInput ? parseFloat(stepUpInput) / 100 : 0;
+            console.log('FIRE Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp);
+
+            const currentTarget = salary * multiple;
+            const inflationAdjustedTarget = currentTarget * Math.pow(1 + inflation, years);
+            const monthlyRate = Math.pow(1 + cagr, 1 / 12) - 1;
+            const months = years * 12;
+
+            // Calculate required monthly investment with step-up
+            let targetValue = inflationAdjustedTarget;
+            let monthlyInvestment = targetValue * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1);
+
+            if (stepUp > 0) {
+                // Iterative calculation to account for step-up
+                let accumulatedValue = 0;
+                let currentMonthly = monthlyInvestment;
+                for (let year = 1; year <= years; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        accumulatedValue = (accumulatedValue + currentMonthly) * (1 + monthlyRate);
+                    }
+                    currentMonthly *= (1 + stepUp);
+                }
+
+                // Adjust monthly investment to meet target with step-up
+                monthlyInvestment = (monthlyInvestment * inflationAdjustedTarget) / accumulatedValue;
+            }
+
+            const requiredMonthlyInvestment = monthlyInvestment;
+            const monthlySalary = salary / 12;
+            const investmentPercentage = (requiredMonthlyInvestment / monthlySalary) * 100;
+
+            const results = document.getElementById('results_fire');
+            const finalMonthlyInvestment = requiredMonthlyInvestment * Math.pow(1 + stepUp, years);
+
+            // Remove any existing animation classes
+            results.classList.remove('fire-positive', 'fire-negative');
+
+            // Force a reflow to ensure animation triggers even if same class is added again
+            void results.offsetWidth;
+
+            // Add animation class based on the investment percentage
+            if (investmentPercentage > 0) {
+                if (investmentPercentage <= 30) {
+                    // Very positive case - scaling animation
+                    results.classList.add('fire-positive');
+                } else if (investmentPercentage > 100) {
+                    // Negative case - rotating animation
+                    results.classList.add('fire-negative');
+                }
+
+                // Remove the animation class after it completes to allow re-triggering
+                setTimeout(() => {
+                    results.classList.remove('fire-positive', 'fire-negative');
+                }, 1000);
+            }
+
+            console.log('FIRE Calculator - stepUp > 0:', stepUp > 0);
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Monthly Salary</div>
+                    <div class="result-value">₹${formatIndianNumber(monthlySalary)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Current ${multiple}× Salary Target</div>
+                    <div class="result-value">₹${formatIndianNumber(currentTarget)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Inflation Adjusted Target</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(inflationAdjustedTarget)}</div>
+                </div>
+                ${stepUp > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Starting Monthly Investment</div>
+                    <div class="result-value good">₹${formatIndianNumber(requiredMonthlyInvestment)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Final Monthly Investment (Year ${years})</div>
+                    <div class="result-value">₹${formatIndianNumber(finalMonthlyInvestment)}</div>
+                </div>` : `
+                <div class="result-row">
+                    <div class="result-label">Required Monthly Investment</div>
+                    <div class="result-value good">₹${formatIndianNumber(requiredMonthlyInvestment)}</div>
+                </div>`}
+                <div class="result-row">
+                    <div class="result-label">Required % of Monthly Salary to achieve inflation adjusted target</div>
+                    <div class="result-value ${investmentPercentage < 30 ? 'good' : 'bad'}" id="investment-percentage">${investmentPercentage.toFixed(1)}%</div>
+                </div>
+            `;
+            results.classList.add('show');
+
+            // Trigger animation for investment percentage
+            setTimeout(() => {
+                const investmentElement = document.getElementById('investment-percentage');
+                if (investmentElement) {
+                    triggerAnimation(investmentElement, investmentPercentage < 30);
+                }
+            }, 500);
+        }
+
+        // Trading Edge Calculator
+        function calcTradingEdge() {
+            const startAmount = parseFloat(document.getElementById('startAmount').value);
+            const riskPercent = parseFloat(document.getElementById('riskPercent').value) / 100;
+            const winPercent = parseFloat(document.getElementById('winPercent').value) / 100;
+            const winRate = parseFloat(document.getElementById('winRate').value) / 100;
+            const numTrades = parseInt(document.getElementById('numTrades').value);
+            const positionSizeInput = document.getElementById('positionSize').value;
+            const positionSize = positionSizeInput ? parseFloat(positionSizeInput) / 100 : 1; // Default to 100% if not specified
+
+            // Input validation
+            if (!startAmount || !riskPercent || !winPercent || !winRate || !numTrades) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            if (positionSize < 0.001 || positionSize > 1) {
+                alert("Position size must be between 0.1% and 100%.");
+                return;
+            }
+
+            if (positionSize > 0.5 && positionSize < 1) {
+                alert("Warning: Position size above 50% is extremely risky and not recommended for most traders.");
+            }
+
+            if (positionSize === 1) {
+                // Show info message for 100% position size
+                console.log("Using 100% position size - trading with full capital");
+            }
+
+            const winsExact = winRate * numTrades;
+            const wins = Math.round(winsExact);
+            const losses = numTrades - wins;
+
+            // Calculate position sizing impact
+            const actualRiskPerTrade = riskPercent * positionSize;
+            const actualWinPerTrade = winPercent * positionSize;
+
+            const finalBalance = startAmount
+                * Math.pow(1 + actualWinPerTrade, wins)
+                * Math.pow(1 - actualRiskPerTrade, losses);
+
+            const finalProfit = finalBalance - startAmount;
+            const evPerTradePct = ((winRate * actualWinPerTrade) - ((1 - winRate) * actualRiskPerTrade)) * 100;
+            const roiPct = (finalProfit / startAmount) * 100;
+
+            // Calculate Maximum Drawdown using proper simulation
+            let maxDrawdown = 0;
+            let maxBalance = startAmount;
+            let currentBalance = startAmount;
+
+            // Simulate worst-case scenario (all losses first, then wins)
+            const worstCaseLosses = Math.ceil(numTrades * (1 - winRate));
+            const worstCaseWins = numTrades - worstCaseLosses;
+
+            // Apply all losses first (worst case)
+            for (let i = 0; i < worstCaseLosses; i++) {
+                currentBalance *= (1 - actualRiskPerTrade);
+                if (currentBalance > maxBalance) {
+                    maxBalance = currentBalance;
+                }
+                const drawdown = (maxBalance - currentBalance) / maxBalance * 100;
+                if (drawdown > maxDrawdown) {
+                    maxDrawdown = drawdown;
+                }
+            }
+
+            // Then apply wins
+            for (let i = 0; i < worstCaseWins; i++) {
+                currentBalance *= (1 + actualWinPerTrade);
+                if (currentBalance > maxBalance) {
+                    maxBalance = currentBalance;
+                }
+                const drawdown = (maxBalance - currentBalance) / maxBalance * 100;
+                if (drawdown > maxDrawdown) {
+                    maxDrawdown = drawdown;
+                }
+            }
+
+            // Calculate theoretical maximum drawdown based on consecutive losses
+            // This calculates how many consecutive losses would result in a 90% loss
+            const maxConsecutiveLosses = Math.ceil(Math.log(0.1) / Math.log(1 - actualRiskPerTrade)); // Until 90% loss
+            const theoreticalMaxDrawdown = (1 - Math.pow(1 - actualRiskPerTrade, maxConsecutiveLosses)) * 100;
+
+            // Also calculate expected drawdown based on win rate and risk/reward
+            const expectedDrawdown = (1 - winRate) * actualRiskPerTrade * 100;
+
+            const results = document.getElementById('results_tradingEdge');
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Position Size Used</div>
+                    <div class="result-value ${positionSize <= 0.05 ? 'good' : positionSize <= 0.1 ? '' : positionSize === 1 ? 'highlight' : 'bad'}">${(positionSize * 100).toFixed(1)}% ${positionSize <= 0.05 ? '(Conservative)' : positionSize <= 0.1 ? '(Moderate)' : positionSize === 1 ? '(Full Capital)' : '(Aggressive)'}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Actual Risk per Trade</div>
+                    <div class="result-value">${(actualRiskPerTrade * 100).toFixed(2)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Actual Win per Trade</div>
+                    <div class="result-value">${(actualWinPerTrade * 100).toFixed(2)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Wins/Total Trades</div>
+                    <div class="result-value">${wins} / ${numTrades}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Expected Value per Trade</div>
+                    <div class="result-value">${evPerTradePct.toFixed(2)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Expected Drawdown</div>
+                    <div class="result-value ${expectedDrawdown <= 15 ? 'good' : expectedDrawdown <= 30 ? '' : 'bad'}">${expectedDrawdown.toFixed(1)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Maximum Drawdown (Worst Case)</div>
+                    <div class="result-value ${maxDrawdown <= 20 ? 'good' : maxDrawdown <= 30 ? '' : 'bad'}">${maxDrawdown.toFixed(1)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Theoretical Max Drawdown</div>
+                    <div class="result-value ${theoreticalMaxDrawdown <= 30 ? 'good' : theoreticalMaxDrawdown <= 50 ? '' : 'bad'}">${theoreticalMaxDrawdown.toFixed(1)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Final Balance</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(finalBalance)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Profit/Loss</div>
+                    <div class="result-value ${finalProfit >= 0 ? 'good' : ''}">₹${formatIndianNumber(finalProfit)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Return on Capital (ROI)</div>
+                    <div class="result-value ${roiPct >= 0 ? 'good' : ''}">${roiPct.toFixed(2)}%</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Kelly Criterion Optimal Position</div>
+                    <div class="result-value ${evPerTradePct > 0 ? 'good' : ''}">${evPerTradePct > 0 ? (evPerTradePct / 100 * 100).toFixed(1) + '%' : 'N/A (Negative EV)'}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Position Sizing Note</div>
+                    <div class="result-value" style="font-size: 13px; color: #9fb2b3;">
+                        ${positionSize === 1 ?
+                    'You are trading with 100% of your capital per trade. This means you are risking ' + (actualRiskPerTrade * 100).toFixed(2) + '% of your capital per trade. This approach maximizes potential returns but also maximizes risk.' :
+                    'Smaller positions reduce risk but may limit returns. Kelly Criterion suggests optimal position size for maximum growth. Your current position size of ' + (positionSize * 100).toFixed(1) + '% means you\'re risking ' + (actualRiskPerTrade * 100).toFixed(2) + '% of your capital per trade.'
+                }
+                    </div>
+                </div>
+            `;
+            results.classList.add('show');
+        }
+
+        // Trading Return Calculator
+        function calcTradingReturn() {
+            const startingAmount = parseFloat(document.getElementById("startingAmount_trade").value);
+            const years = parseInt(document.getElementById("years_trade").value);
+            const cagr = parseFloat(document.getElementById("cagr_trade").value) / 100;
+            const monthlyContribution = parseFloat(document.getElementById("monthlyContribution_trade").value) || 0;
+            const stepUp = parseFloat(document.getElementById("stepUp_trade").value) / 100 || 0;
+            const inflation = parseFloat(document.getElementById("inflation_trade").value) / 100 || 0;
+
+            if (isNaN(startingAmount) || isNaN(years) || isNaN(cagr)) {
+                alert("Please fill in Starting Amount, Years, and CAGR.");
+                return;
+            }
+
+            const monthlyRate = Math.pow(1 + cagr, 1 / 12) - 1;
+            let endAmount = startingAmount;
+            let totalInvested = startingAmount;
+            let currentMonthlyContribution = monthlyContribution;
+
+            for (let year = 1; year <= years; year++) {
+                for (let month = 1; month <= 12; month++) {
+                    endAmount = (endAmount + currentMonthlyContribution) * (1 + monthlyRate);
+                    totalInvested += currentMonthlyContribution;
+                }
+                currentMonthlyContribution *= (1 + stepUp);
+            }
+
+            const profits = endAmount - totalInvested;
+            const roiPct = ((endAmount - totalInvested) / totalInvested) * 100;
+
+            // Calculate inflation-adjusted values
+            const inflationAdjustedEndAmount = endAmount / Math.pow(1 + inflation, years);
+            const inflationAdjustedProfits = inflationAdjustedEndAmount - totalInvested;
+            const inflationAdjustedRoiPct = ((inflationAdjustedEndAmount - totalInvested) / totalInvested) * 100;
+
+            const results = document.getElementById("results_tradingReturn");
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">End Amount</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(endAmount)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Invested</div>
+                    <div class="result-value">₹${formatIndianNumber(totalInvested)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Profits</div>
+                    <div class="result-value ${profits >= 0 ? 'good' : ''}">₹${formatIndianNumber(profits)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Return on Investment</div>
+                    <div class="result-value ${roiPct >= 0 ? 'good' : ''}">${roiPct.toFixed(2)}%</div>
+                </div>
+                ${inflation > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Inflation-Adjusted End Amount</div>
+                    <div class="result-value">₹${formatIndianNumber(inflationAdjustedEndAmount)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Inflation-Adjusted Profits</div>
+                    <div class="result-value ${inflationAdjustedProfits >= 0 ? 'good' : ''}">₹${formatIndianNumber(inflationAdjustedProfits)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Inflation-Adjusted ROI</div>
+                    <div class="result-value ${inflationAdjustedRoiPct >= 0 ? 'good' : ''}">${inflationAdjustedRoiPct.toFixed(2)}%</div>
+                </div>
+                ` : ''}
+            `;
+            results.classList.add('show');
+        }
+
+        // Return Rate Calculator
+        function calcReturnRate() {
+            const targetAmount = parseFloat(document.getElementById("targetAmount").value);
+            const startingAmount = parseFloat(document.getElementById("startingAmount_return").value);
+            const years = parseInt(document.getElementById("years_return").value);
+            const monthlyContribution = parseFloat(document.getElementById("monthlyContribution_return").value) || 0;
+            const stepUp = parseFloat(document.getElementById("stepUp_return").value) / 100 || 0;
+            const inflation = parseFloat(document.getElementById("inflation_return").value) / 100 || 0;
+
+
+            // Input validation
+            if (!targetAmount || !startingAmount || !years) {
+                alert("Please fill in Target Amount, Starting Amount, and Years.");
+                return;
+            }
+
+            if (targetAmount <= startingAmount && monthlyContribution === 0) {
+                alert("Target amount must be greater than starting amount when no monthly contributions are made.");
+                return;
+            }
+
+            // Use binary search to find the required return rate
+            let low = -0.99; // -99% return rate
+            let high = 10; // 1000% return rate
+            let requiredRate = 0;
+            let iterations = 0;
+            const maxIterations = 100;
+            const tolerance = 0.0001; // 0.01% tolerance
+
+            while (iterations < maxIterations && (high - low) > tolerance) {
+                requiredRate = (low + high) / 2;
+                const monthlyRate = Math.pow(1 + requiredRate, 1 / 12) - 1;
+
+                let endAmount = startingAmount;
+                let currentMonthlyContribution = monthlyContribution;
+
+                for (let year = 1; year <= years; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        endAmount = endAmount * (1 + monthlyRate) + currentMonthlyContribution;
+                    }
+                    currentMonthlyContribution *= (1 + stepUp);
+                }
+
+                if (Math.abs(endAmount - targetAmount) < tolerance) {
+                    break;
+                } else if (endAmount < targetAmount) {
+                    low = requiredRate;
+                } else {
+                    high = requiredRate;
+                }
+                iterations++;
+            }
+
+            // Calculate final values with the found rate
+            const monthlyRate = Math.pow(1 + requiredRate, 1 / 12) - 1;
+            let endAmount = startingAmount;
+            let totalInvested = startingAmount;
+            let currentMonthlyContribution = monthlyContribution;
+
+            for (let year = 1; year <= years; year++) {
+                for (let month = 1; month <= 12; month++) {
+                    endAmount = endAmount * (1 + monthlyRate) + currentMonthlyContribution;
+                    totalInvested += currentMonthlyContribution;
+                }
+                currentMonthlyContribution *= (1 + stepUp);
+            }
+
+            const totalInterest = endAmount - totalInvested;
+            const requiredAnnualRate = requiredRate * 100;
+
+            // Determine if the required rate is realistic
+            let rateAssessment = '';
+            let rateColor = '';
+            if (requiredAnnualRate <= 8) {
+                rateAssessment = ' (Conservative)';
+                rateColor = 'good';
+            } else if (requiredAnnualRate <= 15) {
+                rateAssessment = ' (Moderate)';
+                rateColor = '';
+            } else if (requiredAnnualRate <= 25) {
+                rateAssessment = ' (Aggressive)';
+                rateColor = 'bad';
+            } else {
+                rateAssessment = ' (Very Aggressive)';
+                rateColor = 'bad';
+            }
+
+            const results = document.getElementById("results_returnRate");
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Required Annual Return Rate</div>
+                    <div class="result-value highlight ${rateColor}">${requiredAnnualRate.toFixed(3)}%${rateAssessment}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Target Amount</div>
+                    <div class="result-value">₹${formatIndianNumber(targetAmount)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Starting Amount</div>
+                    <div class="result-value">₹${formatIndianNumber(startingAmount)}</div>
+                </div>
+                                 <div class="result-row">
+                     <div class="result-label">Total Contributions</div>
+                     <div class="result-value">₹${formatIndianNumber(totalInvested - startingAmount)}</div>
+                 </div>
+                 ${stepUp > 0 ? `
+                 <div class="result-row">
+                     <div class="result-label">Starting Monthly Contribution</div>
+                     <div class="result-value good">₹${formatIndianNumber(monthlyContribution)}</div>
+                 </div>
+                 <div class="result-row">
+                     <div class="result-label">Final Monthly Contribution (Year ${years})</div>
+                     <div class="result-value">₹${formatIndianNumber(monthlyContribution * Math.pow(1 + stepUp, years))}</div>
+                 </div>` : `
+                 <div class="result-row">
+                     <div class="result-label">Monthly Contribution</div>
+                     <div class="result-value">₹${formatIndianNumber(monthlyContribution)}</div>
+                 </div>`}
+                <div class="result-row">
+                    <div class="result-label">Total Interest Needed</div>
+                    <div class="result-value">₹${formatIndianNumber(totalInterest)}</div>
+                </div>
+                ${inflation > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Inflation-Adjusted Target (Year ${years})</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(targetAmount * Math.pow(1 + inflation, years))}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Required Return Rate for Inflation-Adjusted Target</div>
+                    <div class="result-value good">${((Math.pow(1 + inflation, years) * requiredRate * 100) + (inflation * 100)).toFixed(3)}%</div>
+                </div>` : ''}
+
+                <div class="result-row">
+                    <div class="result-label">Rate Assessment</div>
+                    <div class="result-value" style="font-size: 13px; color: #9fb2b3;">
+                        ${requiredAnnualRate <= 8 ? 'Conservative - Achievable with bonds and stable investments' :
+                    requiredAnnualRate <= 15 ? 'Moderate - Achievable with diversified equity investments' :
+                        requiredAnnualRate <= 25 ? 'Aggressive - Requires high-risk investments or exceptional market conditions' :
+                            'Very Aggressive - Extremely difficult to achieve consistently'}
+                    </div>
+                </div>
+            `;
+            results.classList.add('show');
+        }
+
+        // Investment Length Calculator
+        function calcInvestmentLength() {
+            const targetAmount = parseFloat(document.getElementById("targetAmount_length").value);
+            const startingAmount = parseFloat(document.getElementById("startingAmount_length").value);
+            const returnRate = parseFloat(document.getElementById("returnRate_length").value) / 100;
+            const monthlyContribution = parseFloat(document.getElementById("monthlyContribution_length").value) || 0;
+            const stepUp = parseFloat(document.getElementById("stepUp_length").value) / 100 || 0;
+            const inflation = parseFloat(document.getElementById("inflation_length").value) / 100 || 0;
+
+            // Input validation
+            if (!targetAmount || !startingAmount || !returnRate) {
+                alert("Please fill in Target Amount, Starting Amount, and Return Rate.");
+                return;
+            }
+
+            if (targetAmount <= startingAmount && monthlyContribution === 0) {
+                alert("Target amount must be greater than starting amount when no monthly contributions are made.");
+                return;
+            }
+
+            // Use annual compounding by default
+            const annualRate = returnRate;
+            const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
+
+            // Use binary search to find the required time
+            let low = 0;
+            let high = 100; // Maximum 100 years
+            let requiredYears = 0;
+            let iterations = 0;
+            const maxIterations = 100;
+            const tolerance = 0.001; // 0.001 years tolerance
+
+            while (iterations < maxIterations && (high - low) > tolerance) {
+                requiredYears = (low + high) / 2;
+
+                let endAmount = startingAmount;
+
+                if (monthlyContribution > 0) {
+                    // Calculate with monthly contributions and annual compounding
+                    let currentMonthlyContribution = monthlyContribution;
+                    for (let year = 1; year <= requiredYears; year++) {
+                        for (let month = 1; month <= 12; month++) {
+                            endAmount = endAmount * (1 + monthlyRate) + currentMonthlyContribution;
+                        }
+                        currentMonthlyContribution *= (1 + stepUp);
+                    }
+                } else {
+                    // No contributions - simple annual compound interest
+                    endAmount = startingAmount * Math.pow(1 + annualRate, requiredYears);
+                }
+
+                if (Math.abs(endAmount - targetAmount) < tolerance) {
+                    break;
+                } else if (endAmount < targetAmount) {
+                    low = requiredYears;
+                } else {
+                    high = requiredYears;
+                }
+                iterations++;
+            }
+
+            // Calculate final values with the found time
+            let endAmount = startingAmount;
+            let totalInvested = startingAmount;
+
+            if (monthlyContribution > 0) {
+                // Calculate with monthly contributions and annual compounding
+                let currentMonthlyContribution = monthlyContribution;
+                for (let year = 1; year <= requiredYears; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        endAmount = endAmount * (1 + monthlyRate) + currentMonthlyContribution;
+                        totalInvested += currentMonthlyContribution;
+                    }
+                    currentMonthlyContribution *= (1 + stepUp);
+                }
+            } else {
+                // No contributions - simple annual compound interest
+                endAmount = startingAmount * Math.pow(1 + annualRate, requiredYears);
+            }
+
+            const totalInterest = endAmount - totalInvested;
+            const years = Math.floor(requiredYears);
+            const months = Math.round((requiredYears - years) * 12);
+
+            // Calculate inflation-adjusted target and additional time needed
+            let inflationAdjustedTarget = targetAmount;
+            let additionalYears = 0;
+            let additionalMonths = 0;
+
+            if (inflation > 0) {
+                inflationAdjustedTarget = targetAmount * Math.pow(1 + inflation, years);
+
+                // Calculate additional time needed to reach inflation-adjusted target
+                let additionalEndAmount = endAmount;
+                let additionalRequiredYears = 0;
+                let additionalIterations = 0;
+                const additionalMaxIterations = 100;
+                const additionalTolerance = 0.001;
+
+                // Use binary search to find additional time needed
+                let additionalLow = 0;
+                let additionalHigh = 50; // Maximum 50 additional years
+
+                while (additionalIterations < additionalMaxIterations && (additionalHigh - additionalLow) > additionalTolerance) {
+                    additionalRequiredYears = (additionalLow + additionalHigh) / 2;
+
+                    let additionalEndAmount = endAmount;
+
+                    if (monthlyContribution > 0) {
+                        // Calculate with monthly contributions and annual compounding
+                        let currentMonthlyContribution = monthlyContribution * Math.pow(1 + stepUp, years);
+                        for (let year = 1; year <= additionalRequiredYears; year++) {
+                            for (let month = 1; month <= 12; month++) {
+                                additionalEndAmount = additionalEndAmount * (1 + monthlyRate) + currentMonthlyContribution;
+                            }
+                            currentMonthlyContribution *= (1 + stepUp);
+                        }
+                    } else {
+                        // No contributions - simple annual compound interest
+                        additionalEndAmount = endAmount * Math.pow(1 + annualRate, additionalRequiredYears);
+                    }
+
+                    if (Math.abs(additionalEndAmount - inflationAdjustedTarget) < additionalTolerance) {
+                        break;
+                    } else if (additionalEndAmount < inflationAdjustedTarget) {
+                        additionalLow = additionalRequiredYears;
+                    } else {
+                        additionalHigh = additionalRequiredYears;
+                    }
+                    additionalIterations++;
+                }
+
+                additionalYears = Math.floor(additionalRequiredYears);
+                additionalMonths = Math.round((additionalRequiredYears - additionalYears) * 12);
+            }
+
+            const results = document.getElementById("results_investmentLength");
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Investment Length</div>
+                    <div class="result-value highlight good">${years} years ${months > 0 ? months + ' months' : ''}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">End Balance</div>
+                    <div class="result-value">₹${formatIndianNumber(endAmount)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Starting Amount</div>
+                    <div class="result-value">₹${formatIndianNumber(startingAmount)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Contributions</div>
+                    <div class="result-value">₹${formatIndianNumber(totalInvested - startingAmount)}</div>
+                </div>
+                                 <div class="result-row">
+                     <div class="result-label">Total Interest</div>
+                     <div class="result-value">₹${formatIndianNumber(totalInterest)}</div>
+                 </div>
+                 ${stepUp > 0 ? `
+                 <div class="result-row">
+                     <div class="result-label">Starting Monthly Contribution</div>
+                     <div class="result-value good">₹${formatIndianNumber(monthlyContribution)}</div>
+                 </div>
+                 <div class="result-row">
+                     <div class="result-label">Final Monthly Contribution (Year ${Math.floor(requiredYears)})</div>
+                     <div class="result-value">₹${formatIndianNumber(monthlyContribution * Math.pow(1 + stepUp, Math.floor(requiredYears)))}</div>
+                 </div>` : ''}
+                 ${inflation > 0 ? `
+                 <div class="result-row">
+                     <div class="result-label">Inflation-Adjusted Target (Year ${years})</div>
+                     <div class="result-value highlight">₹${formatIndianNumber(inflationAdjustedTarget)}</div>
+                 </div>
+                 <div class="result-row">
+                     <div class="result-label">Investment Length to Achieve Inflation-Adjusted Target</div>
+                     <div class="result-value good">${years + additionalYears} years ${additionalMonths > 0 ? additionalMonths + ' months' : ''}</div>
+                 </div>
+                 <div class="result-row">
+                     <div class="result-label">Additional Time Needed</div>
+                     <div class="result-value">${additionalYears} years ${additionalMonths > 0 ? additionalMonths + ' months' : ''}</div>
+                 </div>` : ''}
+            `;
+            results.classList.add('show');
+        }
+
+        // SWP Calculator
+        function formatHelperAll() {
+            const tot = Number(document.getElementById('totalInvestment').value || 0);
+            const yw = Number(document.getElementById('yearlyWithdrawal').value || 0);
+            document.getElementById('totalInvestmentHelper').textContent = tot ? readableSimple(tot) : "";
+            document.getElementById('yearlyWithdrawalHelper').textContent = yw ? readableSimple(yw) : "";
+        }
+
+        function updateAllHelpers() {
+            formatHelperAll(); // Update SWP calculator helpers
+            // Update all other monetary input helpers
+            const monetaryInputs = [
+                'salary_fire',
+                'startAmount',
+                'startingAmount_trade',
+                'monthlyContribution_trade',
+                'monthlyExpense_ret',
+                'monthlyInvestment_ret'
+            ];
+            monetaryInputs.forEach(inputId => formatMonetaryInputHelper(inputId));
+        }
+
+        function calcSWP() {
+            const totalInvestment = Number(document.getElementById('totalInvestment').value || 0);
+            let yearlyWithdrawal = Number(document.getElementById('yearlyWithdrawal').value || 0);
+            const stepUpPct = Number(document.getElementById('stepUp').value || 0) / 100;
+            const cagr = Number(document.getElementById('cagr_swp').value || 0) / 100;
+            const inflation = Number(document.getElementById('inflation_swp').value || 0) / 100;
+            const years = Math.max(0, Math.floor(Number(document.getElementById('years_swp').value || 0)));
+
+            let balance = totalInvestment;
+            let totalWithdrawn = 0;
+
+            for (let y = 1; y <= years; y++) {
+                balance = balance * (1 + cagr);
+                if (balance <= 0) break;
+                if (yearlyWithdrawal >= balance) {
+                    totalWithdrawn += balance;
+                    balance = 0;
+                    break;
+                } else {
+                    balance -= yearlyWithdrawal;
+                    totalWithdrawn += yearlyWithdrawal;
+                }
+                yearlyWithdrawal = yearlyWithdrawal * (1 + stepUpPct);
+            }
+
+            const inflationAdj = (inflation === 0) ? balance : (balance / Math.pow(1 + inflation, years));
+
+            const results = document.getElementById('results_swp');
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Total Amount Withdrawn</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(totalWithdrawn)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Investment Remaining</div>
+                    <div class="result-value">₹${formatIndianNumber(balance)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Inflation-Adjusted Remaining</div>
+                    <div class="result-value good">₹${formatIndianNumber(inflationAdj)}</div>
+                </div>
+            `;
+            results.classList.add('show');
+        }
+
+        // Retirement Calculator
+        function calcRetirement() {
+            const monthlyExpense = parseFloat(document.getElementById('monthlyExpense_ret').value);
+            const currentAge = parseInt(document.getElementById('currentAge_ret').value);
+            const retirementAge = parseInt(document.getElementById('retirementAge_ret').value);
+            const yearsOfSalary = parseInt(document.getElementById('yearsOfSalary_ret').value);
+            const inflationRate = parseFloat(document.getElementById('inflationRate_ret').value) / 100;
+            const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment_ret').value);
+            const cagr = parseFloat(document.getElementById('cagr_ret').value) / 100;
+            const stepUpInput = document.getElementById('stepUp_ret').value;
+            const stepUp = stepUpInput ? parseFloat(stepUpInput) / 100 : 0;
+            console.log('Retirement Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp);
+
+            const yearsToRetirement = retirementAge - currentAge;
+            const monthlyExpenseFuture = monthlyExpense * Math.pow(1 + inflationRate, yearsToRetirement);
+            const annualExpenseFuture = monthlyExpenseFuture * 12;
+            const targetCorpus = annualExpenseFuture * yearsOfSalary;
+
+            let futureValue = 0;
+            let totalInvested = 0;
+            let currentSIP = monthlyInvestment;
+            const monthlyRate = Math.pow(1 + cagr, 1 / 12) - 1;
+
+            for (let year = 1; year <= yearsToRetirement; year++) {
+                let yearlyFV = currentSIP * ((Math.pow(1 + monthlyRate, 12) - 1) / monthlyRate) * (1 + monthlyRate);
+                futureValue = futureValue * Math.pow(1 + monthlyRate, 12) + yearlyFV;
+                totalInvested += currentSIP * 12;
+                currentSIP *= (1 + stepUp);
+            }
+
+            console.log('Retirement Calculator - stepUp > 0:', stepUp > 0);
+            const results = document.getElementById('results_retirement');
+
+            // Remove any existing animation classes
+            results.classList.remove('fire-positive', 'fire-negative');
+
+            // Force a reflow to ensure animation triggers even if same class is added again
+            void results.offsetWidth;
+
+            // Add animation based on whether the target is met
+            if (futureValue >= targetCorpus) {
+                results.classList.add('fire-positive');
+            } else {
+                results.classList.add('fire-negative');
+            }
+
+            // Remove the animation class after it completes
+            setTimeout(() => {
+                results.classList.remove('fire-positive', 'fire-negative');
+            }, 1000);
+
+            results.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Future Monthly Expense</div>
+                    <div class="result-value">₹${formatIndianNumber(monthlyExpenseFuture)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Future Annual Expense</div>
+                    <div class="result-value">₹${formatIndianNumber(annualExpenseFuture)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Required Corpus</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(targetCorpus)}</div>
+                </div>
+                ${stepUp > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Starting Monthly Investment</div>
+                    <div class="result-value">₹${formatIndianNumber(monthlyInvestment)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Final Monthly Investment (Year ${yearsToRetirement})</div>
+                    <div class="result-value">₹${formatIndianNumber(currentSIP)}</div>
+                </div>` : `
+                <div class="result-row">
+                    <div class="result-label">Monthly Investment</div>
+                    <div class="result-value">₹${formatIndianNumber(monthlyInvestment)}</div>
+                </div>`}
+                <div class="result-row">
+                    <div class="result-label">Total Investment</div>
+                    <div class="result-value">₹${formatIndianNumber(totalInvested)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Expected Future Value</div>
+                    <div class="result-value ${futureValue >= targetCorpus ? 'good' : 'bad'}" id="future-value">₹${formatIndianNumber(futureValue)}</div>
+                </div>
+            `;
+            results.classList.add('show');
+
+            // Trigger animation for future value
+            setTimeout(() => {
+                const futureValueElement = document.getElementById('future-value');
+                if (futureValueElement) {
+                    triggerAnimation(futureValueElement, futureValue >= targetCorpus);
+                }
+            }, 500);
+        }
+
+        // SIP Calculator function
+        function calculateSIP() {
+            const P = parseFloat(document.getElementById('monthly_sip').value);
+            const annualRate = parseFloat(document.getElementById('annualRate_sip').value);
+            const years = parseInt(document.getElementById('years_sip').value, 10);
+            const stepUpInput = document.getElementById('stepUp_sip').value;
+            const stepUp = stepUpInput ? parseFloat(stepUpInput) : 0;
+            console.log('SIP Calculator - stepUpInput:', stepUpInput, 'stepUp:', stepUp);
+
+            const resultDiv = document.getElementById('results_sip');
+
+            if (!isFinite(P) || P <= 0 || !isFinite(annualRate) || years <= 0) {
+                resultDiv.innerHTML = "<div class='result-row'><div class='result-value error'>Please enter valid positive numbers for monthly amount, rate and years.</div></div>";
+                return;
+            }
+
+            // Effective monthly rate: convert annual nominal to equivalent monthly
+            const monthlyRate = Math.pow(1 + annualRate / 100, 1 / 12) - 1;
+            const months = years * 12;
+
+            let FV = 0;
+            let invested = 0;
+
+            if (stepUp === 0) {
+                // closed form for beginning-of-period deposits
+                if (monthlyRate === 0) {
+                    FV = P * months;
+                } else {
+                    FV = P * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
+                }
+                invested = P * months;
+            } else {
+                // simulate monthly with yearly step-up
+                let currentMonthly = P;
+                FV = 0;
+                invested = 0;
+                for (let y = 1; y <= years; y++) {
+                    for (let m = 1; m <= 12; m++) {
+                        // deposit at beginning, then earn monthly interest
+                        FV = (FV + currentMonthly) * (1 + monthlyRate);
+                        invested += currentMonthly;
+                    }
+                    // apply yearly step-up
+                    currentMonthly = currentMonthly * (1 + stepUp / 100);
+                }
+            }
+
+            const returns = FV - invested;
+            const investedR = Math.round(invested);
+            const returnsR = Math.round(returns);
+            const fvR = Math.round(FV);
+
+            // Calculate final monthly investment
+            const finalMonthlyInvestment = P * Math.pow(1 + stepUp / 100, years);
+
+            console.log('SIP Calculator - stepUp > 0:', stepUp > 0);
+            resultDiv.innerHTML = `
+                ${stepUp > 0 ? `
+                <div class="result-row">
+                    <div class="result-label">Starting Monthly Investment</div>
+                    <div class="result-value">₹${formatIndianNumber(P)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Final Monthly Investment (Year ${years})</div>
+                    <div class="result-value">₹${formatIndianNumber(finalMonthlyInvestment)}</div>
+                </div>` : `
+                <div class="result-row">
+                    <div class="result-label">Monthly Investment</div>
+                    <div class="result-value">₹${formatIndianNumber(P)}</div>
+                </div>`}
+                <div class="result-row">
+                    <div class="result-label">Total Invested</div>
+                    <div class="result-value">₹${formatIndianNumber(investedR)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Estimated Returns</div>
+                    <div class="result-value">₹${formatIndianNumber(returnsR)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Value</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(fvR)}</div>
+                </div>`;
+
+            // Update helper text
+            const monthlyHelper = document.getElementById('monthly_sip_helper');
+            monthlyHelper.textContent = readableSimple(P);
+            resultDiv.classList.add('show');
+        }
+
+        // EMI Calculator function
+        function calculateEMI() {
+            const loanAmount = parseFloat(document.getElementById('loan_amount').value);
+            const annualRate = parseFloat(document.getElementById('interest_rate').value);
+            const years = parseInt(document.getElementById('loan_tenure').value);
+            const processingFee = parseFloat(document.getElementById('processing_fee').value) || 0;
+
+            const resultDiv = document.getElementById('results_emi');
+
+            if (!isFinite(loanAmount) || loanAmount <= 0 || !isFinite(annualRate) || !isFinite(years) || years <= 0) {
+                resultDiv.innerHTML = "<div class='result-row'><div class='result-value error'>Please enter valid positive numbers for loan amount, interest rate and tenure.</div></div>";
+                return;
+            }
+
+            // Monthly interest rate
+            const monthlyRate = (annualRate / 12) / 100;
+            const totalMonths = years * 12;
+
+            // Calculate EMI using formula: P * r * (1 + r)^n / ((1 + r)^n - 1)
+            const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+
+            // Calculate total payment and interest
+            const totalPayment = emi * totalMonths;
+            const totalInterest = totalPayment - loanAmount;
+
+            // Calculate processing fee
+            const processingFeeAmount = (processingFee / 100) * loanAmount;
+            const totalCost = totalPayment + processingFeeAmount;
+
+            resultDiv.innerHTML = `
+                <div class="result-row">
+                    <div class="result-label">Monthly EMI</div>
+                    <div class="result-value highlight">₹${formatIndianNumber(emi)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Interest Payable</div>
+                    <div class="result-value">₹${formatIndianNumber(totalInterest)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Processing Fee</div>
+                    <div class="result-value">₹${formatIndianNumber(processingFeeAmount)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Total Amount Payable</div>
+                    <div class="result-value">₹${formatIndianNumber(totalCost)}</div>
+                </div>
+                <div class="result-row">
+                    <div class="result-label">Annual Interest Burden</div>
+                    <div class="result-value">₹${formatIndianNumber(totalInterest / years)}</div>
+                </div>`;
+
+            // Update helper text
+            const loanAmountHelper = document.getElementById('loan_amount_helper');
+            loanAmountHelper.textContent = readableSimple(loanAmount);
+            resultDiv.classList.add('show');
+        }
+
+        // Initialize helper text for all monetary inputs
+        function formatMonetaryInputHelper(inputId) {
+            const value = Number(document.getElementById(inputId).value || 0);
+            const helperId = inputId + '_helper';
+            if (document.getElementById(helperId)) {
+                document.getElementById(helperId).textContent = value ? readableSimple(value) : "";
+            }
+        }
+
+        function initializeMonetaryHelpers() {
+            // Setup event listeners for SWP calculator fields
+            document.getElementById('totalInvestment').addEventListener('input', formatHelperAll);
+            document.getElementById('yearlyWithdrawal').addEventListener('input', formatHelperAll);
+
+            // Setup event listeners for other monetary inputs
+            const monetaryInputs = [
+                'salary_fire',
+                'startAmount',
+                'startingAmount_trade',
+                'monthlyContribution_trade',
+                'targetAmount',
+                'startingAmount_return',
+                'monthlyContribution_return',
+                'inflation_return',
+                'targetAmount_length',
+                'startingAmount_length',
+                'monthlyContribution_length',
+                'stepUp_length',
+                'inflation_length',
+                'monthlyExpense_ret',
+                'monthlyInvestment_ret',
+                'monthly_sip',
+                'loan_amount'
+            ];
+
+            monetaryInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('input', () => formatMonetaryInputHelper(inputId));
+                }
+            });
+
+            // Initial formatting for all fields
+            updateAllHelpers();
+        }
+
+        // Simple Smiley Animation Functions
+        function addSmiley(element, isGood) {
+            // Remove existing smiley if any
+            const existingSmiley = element.querySelector('.result-smiley');
+            if (existingSmiley) {
+                existingSmiley.remove();
+            }
+
+            // Create smiley element
+            const smiley = document.createElement('span');
+            smiley.className = 'result-smiley';
+            smiley.textContent = isGood ? '😄' : '😢';
+
+            // Add smiley to the result value
+            element.appendChild(smiley);
+
+            // Remove smiley after animation
+            setTimeout(() => {
+                if (smiley.parentNode) {
+                    smiley.remove();
+                }
+            }, 3000);
+        }
+
+        function triggerAnimation(element, isGood) {
+            if (isGood) {
+                element.classList.add('celebrate');
+                addSmiley(element, true);
+                setTimeout(() => {
+                    element.classList.remove('celebrate');
+                }, 1000);
+            } else {
+                element.classList.add('sad');
+                addSmiley(element, false);
+                setTimeout(() => {
+                    element.classList.remove('sad');
+                }, 1000);
+            }
+        }
+
+        // Initialize all helpers
+        initializeMonetaryHelpers();
+
+        // Add Enter key functionality to move to next input or calculate
+        function setupEnterKeyNavigation() {
+            const calculatorSections = document.querySelectorAll('.calculator-buttons');
+
+            calculatorSections.forEach(section => {
+                const inputs = section.querySelectorAll('input[type="number"]');
+                const calcButton = section.querySelector('button');
+
+                inputs.forEach((input, index) => {
+                    // Select all text when input receives focus
+                    input.addEventListener('focus', function () {
+                        if (this.value) {
+                            this.select();
+                        }
+                    });
+
+                    // Prevent deselection on mouseup
+                    input.addEventListener('mouseup', function (e) {
+                        if (this.selectionStart === this.selectionEnd) {
+                            e.preventDefault();
+                            this.select();
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const nextInput = inputs[index + 1];
+                            if (nextInput) {
+                                nextInput.focus();
+                                nextInput.select();
+                            } else if (calcButton) {
+                                // If it's the last input in the section, trigger the calculation
+                                calcButton.click();
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        // Initialize Enter key navigation
+        setupEnterKeyNavigation();
+
+        // Theme switcher
+        const toggleSwitch = document.querySelector('#checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'light') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+
+</html>
